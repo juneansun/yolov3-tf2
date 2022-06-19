@@ -1,5 +1,4 @@
 from absl import app, flags, logging
-from absl.flags import FLAGS
 import numpy as np
 from yolov3_tf2.models import YoloV3, YoloV3Tiny
 from yolov3_tf2.utils import load_darknet_weights
@@ -10,6 +9,7 @@ flags.DEFINE_string('output', './checkpoints/yolov3.tf', 'path to output')
 flags.DEFINE_boolean('tiny', False, 'yolov3 or yolov3-tiny')
 flags.DEFINE_integer('num_classes', 80, 'number of classes in the model')
 
+FLAGS=flags.FLAGS
 
 def main(_argv):
     physical_devices = tf.config.experimental.list_physical_devices('GPU')
@@ -31,6 +31,7 @@ def main(_argv):
     logging.info('sanity check passed')
 
     yolo.save_weights(FLAGS.output)
+    print(FLAGS.output)
     logging.info('weights saved')
 
 
