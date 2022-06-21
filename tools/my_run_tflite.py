@@ -28,34 +28,6 @@ flags.DEFINE_integer('size', 416, 'image size')
 
 
 def main(_argv):
-    if FLAGS.tiny:
-        yolo = YoloV3Tiny(size=FLAGS.size, classes=FLAGS.num_classes)
-    else:
-        yolo = YoloV3(size=FLAGS.size, classes=FLAGS.num_classes)
-
-    yolo.load_weights(FLAGS.weights)
-    logging.info('weights loaded')
-
-    def representative_data_gen():
-        r_img = tf.image.decode_image(open(FLAGS.image, 'rb').read(), channels=3)
-        r_img = tf.expand_dims(r_img, 0)
-        r_img = transform_images(r_img, 416)
-        yield [r_img]
-
-    converter = tf.lite.TFLiteConverter.from_keras_model(yolo)
-
-    # Fix from https://stackoverflow.com/questions/64490203/tf-lite-non-max-suppression
-    converter.experimental_new_converter = True
-    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-    converter.representative_dataset = representative_data_gen
-    converter.optimizations = [tf.lite.Optimize.DEFAULT]
-    # converter.inference_input_type = tf.uint8
-    converter.inference_output_type = tf.uint8
-
-    tflite_model = converter.convert()
-    open(FLAGS.output, 'wb').write(tflite_model)
-    logging.info("model saved to: {}".format(FLAGS.output))
-
     interpreter = tf.lite.Interpreter(model_path=FLAGS.output)
     interpreter.allocate_tensors()
     logging.info('tflite model loaded')
@@ -70,7 +42,6 @@ def main(_argv):
     img = tf.expand_dims(img, 0)
     img = transform_images(img, 416)
     logging.info('image transformed')
-
 
     t1 = time.time()
     # outputs = interpreter.set_tensor(input_details[0]['index'], img.astype(np.uint8))
