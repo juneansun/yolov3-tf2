@@ -37,13 +37,14 @@ def main(_argv):
     logging.info('weights loaded')
 
     yolo.summary()
-    converter = tf.lite.TFLiteConverter.from_keras_model(yolo)
 
     def representative_data_gen():
-        img = tf.image.decode_image(open(FLAGS.image, 'rb').read(), channels=3)
-        img = tf.expand_dims(img, 0)
-        img = transform_images(img, 416)
-        yield [img]
+        r_img = tf.image.decode_image(open(FLAGS.image, 'rb').read(), channels=3)
+        r_img = tf.expand_dims(r_img, 0)
+        r_img = transform_images(r_img, 416)
+        yield [r_img]
+
+    converter = tf.lite.TFLiteConverter.from_keras_model(yolo)
 
     # Fix from https://stackoverflow.com/questions/64490203/tf-lite-non-max-suppression
     converter.experimental_new_converter = True
